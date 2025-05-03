@@ -1,36 +1,41 @@
+#include <WiFi.h>
+#include "network.h"
 #include <Arduino.h>
-#include <iostream>
-#include "WiFi.h"
 
-// functions for debugging and constant to allow debuging functions to be called
-#include "debug.h"
-#define DEBUG 1
-
-int main () {
-    if(DEBUG) in("main");
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-
-    int numNetworks;
-    if((numNetworks = WiFi.scanNetworks()) > 0) {
-        std::cout << "Found networks" << std::endl;
-    } else {
-        std::cout << "Didn't find any networks" << std::endl;
-    }
-    if(DEBUG) out("main");
-    return 0;
-}
-
+// Connected PINS names
+int pushButton = 4;
+int builtinLED = 2;
+int BLUELED = 19;
 /* IS GOING TO BE RUNNED ONCE ON STARTUP */
 void setup() {
   Serial.begin(115200);
   delay(2000); // delay needed for messages on serial is to be read or written correctly
-  main();
-  Serial.println("Wifi setup done");
+  pinMode(builtinLED, OUTPUT);
+  pinMode(BLUELED, OUTPUT);
+  pinMode(pushButton, INPUT);
+  if(wifiInit()) {  // Showing on LED that wifi connection has been established
+    digitalWrite(builtinLED, HIGH);
+  } else {
+    digitalWrite(builtinLED, LOW);
+  }
 }
 
 /* ENDLESS LOOP REST OF LIFE */
+boolean buttonpushed = false;
+
 void loop() {
-  delay(50000);
-  
+  delay(2000);
+  if(digitalRead(pushButton)) {
+    if(buttonpushed) {
+      digitalWrite(BLUELED, HIGH);
+      buttonpushed = false;
+    } else {
+      digitalWrite(BLUELED, LOW);
+      buttonpushed = true;
+    }
+  }
+  if(!wifiConnected()) {
+    digitalWrite(builtinLED, LOW);
+    WiFi.reconnect();
+  }
 }
