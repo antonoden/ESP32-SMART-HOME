@@ -1,7 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-bool wifiInit();
-bool wifiConnected();
+bool wifiConnect();
+bool isConnected();
 
 #endif
